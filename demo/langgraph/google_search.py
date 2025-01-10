@@ -1,5 +1,5 @@
+import os
 from typing import Any, List, Optional
-
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
@@ -9,11 +9,14 @@ from langchain_community.utilities import SerpAPIWrapper
 from langchain_community.tools import GooglePlacesTool
 from openai import OpenAI
 from pydantic import Field, BaseModel
-import os
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 # 设置 API Key
-os.environ["SERPAPI_API_KEY"] = "57b1783f5dc4bc650cda6d21b06d2a1d5cbf571da23ac1c5230741e2e1c52c09"
-os.environ["GPLACES_API_KEY"] = "57b1783f5dc4bc650cda6d21b06d2a1d5cbf571da23ac1c5230741e2e1c52c09"
+os.environ["SERPAPI_API_KEY"] = os.getenv("SERPAPI_API_KEY")
+os.environ["GPLACES_API_KEY"] = os.getenv("GOOGLE_PLACES_API_KEY")
 
 class DeepSeekChatModel(BaseChatModel):
     """
@@ -22,10 +25,13 @@ class DeepSeekChatModel(BaseChatModel):
     client: OpenAI = Field(default=None)
     model_name: str = Field(default="deepseek-chat")
 
-    def __init__(self, api_key: str, base_url: str = "https://api.deepseek.com", model: str = "deepseek-chat"):
+    def __init__(self):
         super().__init__()
-        object.__setattr__(self, 'client', OpenAI(api_key=api_key, base_url=base_url))
-        object.__setattr__(self, 'model_name', model)
+        object.__setattr__(self, 'client', OpenAI(
+            api_key=os.getenv("LLM_API_KEY"), 
+            base_url=os.getenv("LLM_BASE_URL")
+        ))
+        object.__setattr__(self, 'model_name', "deepseek-chat")
 
     def _generate(
         self,
@@ -128,9 +134,7 @@ places = StructuredTool.from_function(
 )
 
 # 创建 DeepSeek 模型
-deepseek_model = DeepSeekChatModel(
-    api_key="sk-00acc077d0d34f43a21910049163d796"
-)
+deepseek_model = DeepSeekChatModel()
 
 # 创建代理
 from langgraph.prebuilt import create_react_agent

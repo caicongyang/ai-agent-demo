@@ -2,7 +2,12 @@ from typing import List
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticToolsParser
-from openai import OpenAI as OpenAIClient
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+# 加载环境变量
+load_dotenv()
 
 # 使用 Pydantic 类定义工具模式
 class Add(BaseModel):
@@ -42,30 +47,14 @@ def multiply(a: int, b: int) -> int:
     return a * b
 
 class ToolCallingDemo:
-    def __init__(self, api_key: str = None, base_url: str = None):
+    def __init__(self):
         """
         初始化工具调用演示
-        
-        :param api_key: API 密钥，如果未提供则从环境变量读取
-        :param base_url: 基础 URL
         """
-        import os
-        
-        # 设置 API 密钥和基础 URL
-        if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
-        
-        # 初始化 OpenAI 客户端
-        self.openai_client = OpenAIClient(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=base_url if base_url else None
-        )
-        
-        # 初始化 LLM 并绑定工具
         self.llm = ChatOpenAI(
-            model="deepseek-chat", 
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=base_url if base_url else None,
+            model="deepseek-chat",
+            openai_api_key=os.getenv("LLM_API_KEY"),
+            base_url=os.getenv("LLM_BASE_URL")
         )
         
         self.tools = [Add, Multiply]
@@ -111,10 +100,7 @@ class ToolCallingDemo:
 
 def main():
     # 创建工具调用演示实例
-    demo = ToolCallingDemo(
-        api_key="sk-00acc077d0d34f43a21910049163d796",
-        base_url="https://api.deepseek.com/v1"
-    )
+    demo = ToolCallingDemo()
     
     # 测试查询
     queries = [
