@@ -1,10 +1,14 @@
-import os
 from typing import Dict, Any, List
 from enum import Enum
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableBranch
+from dotenv import load_dotenv
+import os
+
+# 加载环境变量
+load_dotenv()
 
 class QueryType(Enum):
     """查询类型枚举"""
@@ -26,21 +30,14 @@ class RouteChainDemo:
         llm: 大语言模型实例，用于处理各类查询
     """
 
-    def __init__(self, api_key: str = None, base_url: str = None):
+    def __init__(self):
         """
-        初始化 Route Chain 演示实例
-        
-        Args:
-            api_key (str, optional): API 密钥. Defaults to None.
-            base_url (str, optional): API 基础 URL. Defaults to None.
+        初始化路由链演示实例
         """
-        if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
-        
         self.llm = ChatOpenAI(
-            model="deepseek-chat", 
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=base_url if base_url else None,
+            model="deepseek-chat",
+            openai_api_key=os.getenv("LLM_API_KEY"),
+            base_url=os.getenv("LLM_BASE_URL")
         )
     
     def create_classifier_chain(self) -> Any:
@@ -110,10 +107,6 @@ class RouteChainDemo:
         
         Returns:
             Any: 路由链，根据查询类型选择不同的处理方式
-        
-        Example:
-            >>> chain = demo.create_route_chain()
-            >>> result = chain.invoke("把'你好'翻译成英文")
         """
         classifier_chain = self.create_classifier_chain()
         
@@ -143,17 +136,9 @@ class RouteChainDemo:
         return route_chain
 
 def main():
-    """
-    主函数，演示路由链的使用方法
-    """
+    """主函数，演示路由链的使用方法"""
     # 创建演示实例
-    demo = RouteChainDemo(
-        api_key="sk-00acc077d0d34f43a21910049163d796",
-        base_url="https://api.deepseek.com/v1"
-    )
-    
-    # 创建路由链
-    route_chain = demo.create_route_chain()
+    demo = RouteChainDemo()
     
     # 测试用例
     test_queries = [
@@ -163,13 +148,16 @@ def main():
         "今天天气怎么样？"
     ]
     
+    # 创建路由链
+    route_chain = demo.create_route_chain()
+    
     # 执行测试
     for query in test_queries:
         print(f"\n查询: {query}")
         try:
-            result = route_chain.invoke(query)
+            response = route_chain.invoke(query)
             print("回答:")
-            print(result)
+            print(response)
             print("-" * 50)
         except Exception as e:
             print(f"处理出错: {e}")
