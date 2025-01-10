@@ -1,0 +1,10 @@
+langchain>=0.3,<0.4
+langchain-community>=0.3,<0.4
+langchain-core>=0.3,<0.4
+langgraph>=0.2.20,<0.3
+langchain-google>=2.0.0,<3.0.0
+google-cloud-aiplatform>=1.36.0
+serpapi>=0.1.0
+
+
+
