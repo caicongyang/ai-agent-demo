@@ -4,7 +4,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_community.document_loaders.word_document import Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -86,8 +86,8 @@ class DocumentRAGSystem:
     def split_documents(
         self, 
         documents: List[Any], 
-        chunk_size: int = 500, 
-        chunk_overlap: int = 50
+        chunk_size: int = 200,
+        chunk_overlap: int = 20
     ) -> List[Any]:
         """
         分割文档
@@ -106,20 +106,39 @@ class DocumentRAGSystem:
     def create_vectorstore(
         self, 
         documents: List[Any], 
-        persist_directory: str = './chroma_db'
+        persist_directory: str = './chroma_db',
+        batch_size: int = 64
     ) -> Chroma:
         """
         创建向量存储
         
         :param documents: 文档块
         :param persist_directory: 持久化目录
+        :param batch_size: 每批处理的文档数量
         :return: Chroma向量存储
         """
-        self.vectorstore = Chroma.from_documents(
-            documents=documents, 
-            embedding=self.embeddings,
+        # 分批处理文档
+        if not documents:
+            raise ValueError("没有文档需要处理")
+        
+        # 创建向量存储
+        self.vectorstore = Chroma(
+            embedding_function=self.embeddings,
             persist_directory=persist_directory
         )
+        
+        # 分批添加文档
+        for i in range(0, len(documents), batch_size):
+            batch = documents[i:i + batch_size]
+            if not self.vectorstore:
+                self.vectorstore = Chroma.from_documents(
+                    documents=batch,
+                    embedding=self.embeddings,
+                    persist_directory=persist_directory
+                )
+            else:
+                self.vectorstore.add_documents(batch)
+        
         return self.vectorstore
     
     def create_rag_chain(self, template: str = None):
@@ -181,7 +200,7 @@ def main():
     
     # 文档路径
     document_paths = [
-        './rag/documents/text.pdf'
+        './rag/documents/test.pdf'
     ]
     
     # 确保文档目录存在
