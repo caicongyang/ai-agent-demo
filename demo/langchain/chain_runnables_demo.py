@@ -6,12 +6,25 @@ from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableParallel, RunnableLambda
 
 class ChainRunnablesDemo:
+    """
+    Chain Runnables 演示类
+    
+    该类演示了 LangChain 中链式调用和并行执行的功能，包括：
+    1. 创建笑话生成链
+    2. 创建笑话分析链
+    3. 组合多个链并行执行
+    
+    Attributes:
+        llm: 大语言模型实例，用于生成和分析文本
+    """
+
     def __init__(self, api_key: str = None, base_url: str = None):
         """
-        初始化 Chain Runnables 演示
+        初始化 Chain Runnables 演示实例
         
-        :param api_key: API 密钥
-        :param base_url: 基础 URL
+        Args:
+            api_key (str, optional): API 密钥. Defaults to None.
+            base_url (str, optional): API 基础 URL. Defaults to None.
         """
         # 设置 API 密钥
         if api_key:
@@ -26,47 +39,68 @@ class ChainRunnablesDemo:
     
     def create_joke_chain(self) -> Any:
         """
-        创建一个生成笑话的链
+        创建笑话生成链
         
-        :return: 笑话生成链
+        创建一个可以根据给定主题和风格生成笑话的处理链。
+        
+        Returns:
+            Any: 笑话生成链，接受 style 和 topic 参数
+        
+        Example:
+            >>> chain = demo.create_joke_chain()
+            >>> result = chain.invoke({"style": "幽默", "topic": "编程"})
         """
-        # 创建笑话提示模板
         joke_prompt = ChatPromptTemplate.from_template(
             "请用{style}风格讲一个关于{topic}的笑话"
         )
         
-        # 构建链：提示模板 -> 大模型 -> 输出解析
         joke_chain = joke_prompt | self.llm | StrOutputParser()
         
         return joke_chain
     
     def create_joke_analysis_chain(self) -> Any:
         """
-        创建一个分析笑话的链
+        创建笑话分析链
         
-        :return: 笑话分析链
+        创建一个可以分析笑话幽默程度和创意性的处理链。
+        
+        Returns:
+            Any: 笑话分析链，接受 joke 参数
+        
+        Example:
+            >>> chain = demo.create_joke_analysis_chain()
+            >>> result = chain.invoke({"joke": "一个程序员笑话..."})
         """
-        # 创建分析提示模板
         analysis_prompt = ChatPromptTemplate.from_template(
             "请分析这个笑话的幽默程度和创意性:\n{joke}"
         )
         
-        # 构建分析链：提示模板 -> 大模型 -> 输出解析
         analysis_chain = analysis_prompt | self.llm | StrOutputParser()
         
         return analysis_chain
     
     def create_composed_joke_chain(self) -> Any:
         """
-        创建一个组合的笑话链
+        创建组合笑话链
         
-        :return: 组合笑话链
+        将笑话生成链和分析链组合成一个并行执行的复合链。
+        该链可以同时生成笑话并分析其质量。
+        
+        Returns:
+            Any: 组合笑话链，接受 style 和 topic 参数，返回笑话和分析结果
+        
+        Example:
+            >>> chain = demo.create_composed_joke_chain()
+            >>> result = chain.invoke({
+            ...     "style": "技术幽默",
+            ...     "topic": "Python"
+            ... })
+            >>> print(result["joke"])
+            >>> print(result["analysis"])
         """
-        # 获取笑话和分析链
         joke_chain = self.create_joke_chain()
         analysis_chain = self.create_joke_analysis_chain()
         
-        # 使用 RunnableParallel 并行执行
         composed_chain = RunnableParallel({
             "joke": joke_chain,
             "style": RunnableLambda(lambda x: x["style"]),
@@ -79,13 +113,22 @@ class ChainRunnablesDemo:
         return composed_chain
 
 def main():
+    """
+    主函数，演示链式调用的使用方法
+    
+    包括：
+    1. 创建演示实例
+    2. 定义测试用例
+    3. 创建组合链
+    4. 执行链并打印结果
+    """
     # 创建演示实例
     demo = ChainRunnablesDemo(
         api_key="sk-00acc077d0d34f43a21910049163d796",
         base_url="https://api.deepseek.com/v1"
     )
     
-    # 测试不同的链
+    # 测试用例
     test_cases = [
         {"topic": "程序员", "style": "技术幽默"},
         {"topic": "人工智能", "style": "讽刺"},
@@ -99,7 +142,6 @@ def main():
     for case in test_cases:
         print(f"\n主题: {case['topic']}, 风格: {case['style']}")
         
-        # 调用链
         result = composed_chain.invoke(case)
         
         print("生成的笑话:")
