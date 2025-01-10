@@ -1,7 +1,10 @@
+#conda create -n ai-agent-demo python=3.11
+#conda activate ai-agent-demo
 #pip install -r requirements.txt --upgrade
 langgraph>=0.2.20,<0.3
 langchain>=0.3,<0.4
 langchain-community>=0.3.0
+langchain-chroma>=0.1.0
 serpapi>=0.1.0
 openai>=1.0.0
 pydantic<2.10,>=2.9
