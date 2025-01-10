@@ -19,3 +19,15 @@ venv/
 
 # 向量数据库
 chroma_db/
+
+
+.DS_Store
+.history
+.env
+
+.idea/
+
+venv/
+
+# 临时文件
+temp/
