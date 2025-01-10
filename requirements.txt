@@ -18,5 +18,5 @@ flask>=2.1.0
 python-dotenv>=1.0.0
 pdf2docx>=0.5.6
 python-docx>=0.8.11
-
+langchain-openai>=0.1.0
 

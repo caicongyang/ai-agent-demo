@@ -14,34 +14,43 @@ from langchain_community.chat_models import ChatOpenAI as CommunityChatOpenAI
 class DocumentRAGSystem:
     def __init__(
         self, 
-        api_key: str = None, 
-        base_url: str = None, 
+        embedding_api_key: str = None, 
+        embedding_base_url: str = None,
+        llm_api_key: str = None,
+        llm_base_url: str = None,
         embedding_model: str = "BAAI/bge-m3",
         chat_model: str = "deepseek-chat"
     ):
         """
         初始化文档RAG系统
         
-        :param api_key: API密钥
-        :param base_url: 基础URL
+        :param embedding_api_key: Embedding API密钥
+        :param embedding_base_url: Embedding API基础URL
+        :param llm_api_key: LLM API密钥
+        :param llm_base_url: LLM API基础URL
         :param embedding_model: 嵌入模型
         :param chat_model: 聊天模型
         """
-        # 设置API密钥
-        if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
+        # 设置 Embedding API 密钥
+        if embedding_api_key:
+            os.environ["EMBEDDING_API_KEY"] = embedding_api_key
+        
+        # 设置 LLM API 密钥
+        if llm_api_key:
+            os.environ["LLM_API_KEY"] = llm_api_key
         
         # 初始化嵌入模型
         self.embeddings = OpenAIEmbeddings(
             model=embedding_model,
-            openai_api_base=base_url if base_url else None
+            openai_api_key=embedding_api_key,
+            openai_api_base=embedding_base_url if embedding_base_url else None
         )
         
         # 初始化聊天模型
-        self.llm = CommunityChatOpenAI(
+        self.llm = ChatOpenAI(
             model=chat_model,
-            openai_api_base=base_url if base_url else None,
-            openai_api_key=api_key
+            openai_api_key=llm_api_key,
+            openai_api_base=llm_base_url if llm_base_url else None
         )
         
         # 向量存储
@@ -162,18 +171,21 @@ class DocumentRAGSystem:
 def main():
     # 创建RAG系统实例
     rag_system = DocumentRAGSystem(
-        api_key="sk-00acc077d0d34f43a21910049163d796",
-        base_url="https://api.deepseek.com/v1"
+        embedding_api_key="sk-xhqwgtcihxrfkjjvcscvzfgulfhwfgsvdsszjtrjvyztrrct",
+        embedding_base_url="https://api.siliconflow.cn/v1",
+        llm_api_key="sk-00acc077d0d34f43a21910049163d796",
+        llm_base_url="https://api.deepseek.com/v1",
+        embedding_model="BAAI/bge-m3",
+        chat_model="deepseek-chat"
     )
     
     # 文档路径
     document_paths = [
-        './demo/rag/documents/sample.txt',
-        './demo/rag/documents/sample.pdf'
+        './rag/documents/text.pdf'
     ]
     
     # 确保文档目录存在
-    os.makedirs('./demo/rag/documents', exist_ok=True)
+    os.makedirs('./rag/documents', exist_ok=True)
     
     # 加载文档
     documents = rag_system.load_documents(document_paths)

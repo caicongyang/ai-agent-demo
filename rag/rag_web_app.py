@@ -46,16 +46,21 @@ def initialize_rag_system():
     global rag_system, rag_chain
     
     # 从环境变量读取 API 密钥和基础 URL
-    api_key = os.getenv("EMBEDDING_API_KEY")
-    base_url = os.getenv("EMBEDDING_BASE_URL")
+    embedding_api_key = os.getenv("EMBEDDING_API_KEY")
+    embedding_base_url = os.getenv("EMBEDDING_BASE_URL")
+    
+    llm_api_key = os.getenv("LLM_API_KEY")
+    llm_base_url = os.getenv("LLM_BASE_URL")
     
     # 检查 API 密钥是否存在
-    if not api_key:
-        raise ValueError("未找到 EMBEDDING_API_KEY 环境变量")
+    if not embedding_api_key or not llm_api_key:
+        raise ValueError("未找到 API 密钥")
     
     rag_system = DocumentRAGSystem(
-        api_key=api_key,
-        base_url=base_url,
+        embedding_api_key=embedding_api_key,
+        embedding_base_url=embedding_base_url,
+        llm_api_key=llm_api_key,
+        llm_base_url=llm_base_url,
         embedding_model="BAAI/bge-m3",
         chat_model="deepseek-chat"
     )
