@@ -6,6 +6,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnablePassthrough
 from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
 from langchain_core.output_parsers import StrOutputParser
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 class MemoryChainDemo:
     """
@@ -22,21 +26,14 @@ class MemoryChainDemo:
         summary_memory: 对话摘要记忆
     """
 
-    def __init__(self, api_key: str = None, base_url: str = None):
+    def __init__(self):
         """
         初始化 Memory Chain 演示实例
-        
-        Args:
-            api_key: API 密钥
-            base_url: API 基础 URL
         """
-        if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
-        
         self.llm = ChatOpenAI(
             model="deepseek-chat",
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=base_url if base_url else None,
+            openai_api_key=os.getenv("LLM_API_KEY"),
+            base_url=os.getenv("LLM_BASE_URL"),
         )
         
         # 初始化对话历史记忆
@@ -144,10 +141,7 @@ class MemoryChainDemo:
 def main():
     """主函数，演示记忆功能的使用方法"""
     # 创建演示实例
-    demo = MemoryChainDemo(
-        api_key="sk-00acc077d0d34f43a21910049163d796",
-        base_url="https://api.deepseek.com/v1"
-    )
+    demo = MemoryChainDemo()
     
     # 测试对话历史记忆
     print("=== 测试对话历史记忆 ===")

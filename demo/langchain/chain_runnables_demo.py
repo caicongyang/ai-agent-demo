@@ -1,9 +1,13 @@
-import os
 from typing import Dict, Any
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableParallel, RunnableLambda
+from dotenv import load_dotenv
+import os
+
+# 加载环境变量
+load_dotenv()
 
 class ChainRunnablesDemo:
     """
@@ -18,23 +22,14 @@ class ChainRunnablesDemo:
         llm: 大语言模型实例，用于生成和分析文本
     """
 
-    def __init__(self, api_key: str = None, base_url: str = None):
+    def __init__(self):
         """
-        初始化 Chain Runnables 演示实例
-        
-        Args:
-            api_key (str, optional): API 密钥. Defaults to None.
-            base_url (str, optional): API 基础 URL. Defaults to None.
+        初始化 Chain Runnables 演示
         """
-        # 设置 API 密钥
-        if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
-        
-        # 初始化大模型
         self.llm = ChatOpenAI(
-            model="deepseek-chat", 
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=base_url if base_url else None,
+            model="deepseek-chat",
+            openai_api_key=os.getenv("LLM_API_KEY"),
+            base_url=os.getenv("LLM_BASE_URL")
         )
     
     def create_joke_chain(self) -> Any:
@@ -123,10 +118,7 @@ def main():
     4. 执行链并打印结果
     """
     # 创建演示实例
-    demo = ChainRunnablesDemo(
-        api_key="sk-00acc077d0d34f43a21910049163d796",
-        base_url="https://api.deepseek.com/v1"
-    )
+    demo = ChainRunnablesDemo()
     
     # 测试用例
     test_cases = [
