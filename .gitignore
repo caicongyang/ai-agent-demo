@@ -31,3 +31,5 @@ venv/
 
 # 临时文件
 temp/
+
+*.xlsx
