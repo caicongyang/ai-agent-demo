@@ -161,51 +161,45 @@ def main():
     # 获取当前脚本的绝对路径
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 尝试多种可能的文件路径
-    possible_paths = [
-        os.path.join(current_dir, '..', 'data.xlsx'),  # 项目根目录
-        os.path.join(current_dir, 'data.xlsx'),        # 当前目录
-        os.path.join(os.getcwd(), 'data.xlsx'),        # 工作目录
-        os.path.expanduser('~/data.xlsx')              # 用户主目录
-    ]
-    
-    # 找到第一个存在的文件路径
-    file_path = None
-    for path in possible_paths:
-        if os.path.exists(path):
-            file_path = path
-            break
-    
-    if not file_path:
-        print("错误：未找到 data.xlsx 文件")
-        return
-    
-    # 示例使用
-    handler = ExcelHandler(file_path)
-    
-    # 读取 Excel
-    df = handler.read_excel()
-    
-    # 如果读取失败，打印详细信息并退出
-    if df is None:
-        print("无法读取 Excel 文件")
-        return
-    
-    print("原始数据:")
-    print(df)
-    
-    # 获取第一列的列名
-    first_column = df.columns[0]
-    
-    # 清理第一列数据并放入新列
-    handler.clean_column_data(first_column, '清理后数据')
-    
-    print("\n清理后的数据:")
-    print(handler.df)
-    
-    # 写入新的 Excel 文件
-    output_path = os.path.join(current_dir, '..', 'cleaned_data.xlsx')
-    handler.write_excel(output_path=output_path)
+    # 遍历 file 文件夹下的所有文件
+    for filename in os.listdir(current_dir):
+        # 只处理 Excel 文件
+        if filename.endswith(('.xlsx', '.xls')):
+            file_path = os.path.join(current_dir, filename)
+            print(f"\n处理文件: {filename}")
+            
+            try:
+                # 创建处理器实例
+                handler = ExcelHandler(file_path)
+                
+                # 读取 Excel
+                df = handler.read_excel()
+                
+                # 如果读取失败，继续处理下一个文件
+                if df is None:
+                    print(f"无法读取文件: {filename}")
+                    continue
+                
+                print("原始数据:")
+                print(df)
+                
+                # 获取第一列的列名
+                first_column = df.columns[0]
+                
+                # 清理第一列数据并放入新列
+                handler.clean_column_data(first_column, '清理后数据')
+                
+                print("\n清理后的数据:")
+                print(handler.df)
+                
+                # 生成输出文件名：原文件名 + _cleaned.xlsx
+                input_filename = os.path.splitext(filename)[0]
+                output_path = os.path.join(current_dir, f"{input_filename}_cleaned.xlsx")
+                handler.write_excel(output_path=output_path)
+                
+            except Exception as e:
+                print(f"处理文件 {filename} 时出错: {str(e)}")
+                continue
 
 # 测试代码
 def test_clean_column_data():
