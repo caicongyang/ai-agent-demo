@@ -423,7 +423,7 @@ async def main():
     
     # 测试查询
     queries = [
-        "分析平安银行2023年的股价表现"    ]
+        "预测平安银行2025年的股价表现"    ]
     
     for query in queries:
         print(f"\n查询: {query}")
