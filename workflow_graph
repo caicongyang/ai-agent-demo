@@ -1,0 +1,14 @@
+// Stock Market Analysis Workflow
+digraph {
+	rankdir=LR
+	node [style=filled]
+	START [label=START fillcolor="#ffdfba" shape=circle]
+	data_collection [label="Data Collection" fillcolor="#fad7de" shape=box]
+	data_analysis [label="Data Analysis" fillcolor="#fad7de" shape=box]
+	END [label=END fillcolor="#baffc9" shape=doublecircle]
+	START -> data_collection
+	data_collection -> data_analysis
+	data_analysis -> data_collection
+	data_collection -> END
+	data_analysis -> END
+}
