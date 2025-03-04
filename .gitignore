@@ -33,3 +33,5 @@ venv/
 temp/
 
 *.xlsx
+
+.history
