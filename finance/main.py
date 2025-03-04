@@ -1,21 +1,13 @@
 import os
 import pandas as pd
+import akshare as ak
 from deepseek_chat import DeepSeekChat
+from datetime import datetime
 
-def analyze_stock_data(chat: DeepSeekChat, csv_file: str) -> str:
-    """分析股票CSV数据文件"""
+def analyze_stock_data(chat: DeepSeekChat, stock_data: pd.DataFrame) -> str:
+    """分析股票数据"""
     
     try:
-        # 检查文件是否存在
-        if not os.path.exists(csv_file):
-            raise FileNotFoundError(f"找不到文件: {csv_file}")
-        
-        # 读取CSV文件
-        df = pd.read_csv(csv_file)
-        
-        # 将数据转换为易读的格式
-        data_str = df.to_string(index=False)
-        
         # 构建分析请求，包含角色提示
         analysis_request = f"""# Role: 主力动向分析师
 
@@ -82,7 +74,11 @@ def analyze_stock_data(chat: DeepSeekChat, csv_file: str) -> str:
 ## Initialization
 作为主力动向分析师，你必须遵守上述Rules，按照Workflows执行任务。
 
-以下是个股的历史分笔数据，{data_str}，请开始分析。
+请以Markdown格式输出你的分析报告，使用适当的标题、列表、表格和强调语法，确保报告结构清晰、易于阅读。
+
+以下是个股的历史分笔数据，请开始分析：
+
+{stock_data}
 
 """
         
@@ -95,24 +91,86 @@ def analyze_stock_data(chat: DeepSeekChat, csv_file: str) -> str:
     except Exception as e:
         return f"分析过程中发生错误: {str(e)}"
 
+def save_to_markdown(content: str, stock_code: str) -> str:
+    """将分析结果保存为Markdown文件"""
+    try:
+        # 创建文件名，包含股票代码和当前日期时间
+        now = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{stock_code}_analysis_{now}.md"
+        
+        # 写入文件
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(content)
+        
+        return filename
+    except Exception as e:
+        print(f"保存Markdown文件时出错: {e}")
+        return None
+
 def main():
     try:
         # 初始化 DeepSeekChat
         chat = DeepSeekChat()
         
-        # 指定CSV文件路径
-        csv_file = os.path.join(os.path.dirname(__file__), 'sh603200_20050303_tick.csv')
+        # 设置要分析的股票代码
+        stock_code = "sh605100"  # 例如：sh603200 是上海洗霸
         
-        # 分析股票数据
-        print("开始分析股票数据...")
-        result = analyze_stock_data(chat, csv_file)
+        print(f"正在获取股票 {stock_code} 的分笔数据...")
         
-        # 打印分析结果
-        print("\n" + "="*50)
-        print("股票分析报告")
-        print("="*50 + "\n")
-        print(result)
-        print("\n" + "="*50)
+        # 使用 akshare 直接从接口获取股票分笔数据
+        try:
+            # 获取最新交易日的分笔数据
+            df = ak.stock_zh_a_tick_tx_js(symbol=stock_code)
+            
+            # 打印数据基本信息
+            print(f"获取到 {len(df)} 条分笔数据")
+            print(f"数据列: {df.columns.tolist()}")
+            print(f"数据样例:\n{df.head()}")
+            
+            # 分析股票数据
+            print("开始分析股票数据...")
+            result = analyze_stock_data(chat, df)
+            
+            # 保存分析结果到Markdown文件
+            md_file = save_to_markdown(result, stock_code)
+            if md_file:
+                print(f"分析报告已保存到: {md_file}")
+            
+            # 打印分析结果
+            print("\n" + "="*50)
+            print(f"股票 {stock_code} 分析报告")
+            print("="*50 + "\n")
+            print(result)
+            print("\n" + "="*50)
+            
+        except Exception as e:
+            print(f"获取股票数据失败: {e}")
+            print("尝试使用备用方法...")
+            
+            # 如果接口获取失败，尝试从本地文件读取
+            csv_file = os.path.join(os.path.dirname(__file__), 'sh603200_20050303_tick.csv')
+            if os.path.exists(csv_file):
+                print(f"从本地文件 {csv_file} 读取数据")
+                df = pd.read_csv(csv_file)
+                
+                # 分析股票数据
+                print("开始分析股票数据...")
+                result = analyze_stock_data(chat, df)
+                
+                # 保存分析结果到Markdown文件
+                md_file = save_to_markdown(result, stock_code)
+                if md_file:
+                    print(f"分析报告已保存到: {md_file}")
+                
+                # 打印分析结果
+                print("\n" + "="*50)
+                print("股票分析报告 (从本地文件)")
+                print("="*50 + "\n")
+                print(result)
+                print("\n" + "="*50)
+            else:
+                print(f"本地文件 {csv_file} 不存在")
+                raise
         
     except Exception as e:
         print(f"程序运行出错: {str(e)}")

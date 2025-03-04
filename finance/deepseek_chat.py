@@ -33,7 +33,7 @@ class DeepSeekChat:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        model: str = "deepseek-chat",
+        model: str = "deepseek-reasoner",
         temperature: float = 1.0,
         max_tokens: Optional[int] = None,
         top_p: Optional[float] = None
