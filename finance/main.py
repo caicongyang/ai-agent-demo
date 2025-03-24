@@ -113,7 +113,7 @@ def main():
         chat = DeepSeekChat()
         
         # 设置要分析的股票代码
-        stock_code = "sh605100"  # 例如：sh603200 是上海洗霸
+        stock_code = "sh601177"  # 例如：sh603200 是上海洗霸
         
         print(f"正在获取股票 {stock_code} 的分笔数据...")
         
