@@ -218,6 +218,183 @@ Dify还支持多种其他文档类型：
 - **纯文本**：通过`TextExtractor`处理
 - **JSON/YAML**：通过专用方法提取并格式化
 
+## 文档召回率和精确度优化
+
+Dify项目在RAG系统中实现了多种优化策略，以提高文档检索的召回率和精确度。这些优化主要体现在以下几个方面：
+
+### 1. 智能文档分块策略
+
+文档分块是影响RAG系统性能的关键因素。Dify提供了多种分块策略，用户可以根据具体需求选择合适的方法：
+
+#### 1.1 基于分隔符的自适应分块
+
+Dify支持基于各种分隔符的递归分块，包括：
+- 段落分隔符（`\n\n`）
+- 句子分隔符（`.`、`。`等）
+- 自定义分隔符
+
+系统使用`FixedRecursiveCharacterTextSplitter`实现自定义分隔符分块：
+```python
+character_splitter = FixedRecursiveCharacterTextSplitter.from_encoder(
+    chunk_size=max_tokens,
+    chunk_overlap=chunk_overlap,
+    fixed_separator=separator,
+    separators=["\n\n", "。", ". ", " ", ""],
+    embedding_model_instance=embedding_model_instance,
+)
+```
+
+#### 1.2 分块重叠优化
+
+为了保持上下文连贯性，Dify支持设置分块重叠（chunk overlap）。系统推荐使用大小为最大块大小的10%-25%的重叠区域，以保持语义连贯性：
+
+```python
+# 默认配置
+DEFAULT_MAXIMUM_CHUNK_LENGTH = 1024
+DEFAULT_OVERLAP = 50
+```
+
+#### 1.3 层次化父子分块
+
+Dify实现了一种特殊的层次化分块策略（父子分块模式）：
+- **父块（Parent Chunk）**：用于提供更广泛的上下文信息，保持语义完整性
+- **子块（Child Chunk）**：用于精确检索，提高匹配精度
+
+这种策略通过`ParentChildIndexProcessor`实现，能够同时兼顾检索精度和上下文丰富度：
+```python
+# 父子分块处理配置
+chunkForContext: ParentMode
+parent: {
+  delimiter: string
+  maxLength: number
+}
+child: {
+  delimiter: string
+  maxLength: number
+}
+```
+
+### 2. 多模态检索和混合搜索
+
+Dify实现了多种检索方法的组合，优化了不同场景下的文档召回：
+
+#### 2.1 语义向量检索
+
+利用嵌入模型将文本转换为向量，并通过向量相似度计算进行召回：
+```python
+def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    # 向量相似度检索实现
+    # ...
+```
+
+#### 2.2 关键词检索（BM25）
+
+使用经典的BM25算法进行关键词匹配，特别适合于精确短语的检索：
+```python
+def search_by_full_text(self, query: str, **kwargs: Any) -> list[Document]:
+    # 全文检索实现
+    # ...
+```
+
+#### 2.3 混合检索策略
+
+Dify支持向量检索和关键词检索的混合策略，通过权重配置实现最优检索效果：
+```python
+def _calculate_keyword_score(self, query: str, documents: list[Document]) -> list[float]:
+    # 计算关键词得分
+    # ...
+
+def _calculate_cosine(self, tenant_id: str, query: str, documents: list[Document], 
+                    vector_setting: VectorSetting) -> list[float]:
+    # 计算向量相似度得分
+    # ...
+
+# 混合得分计算
+score = (
+    self.weights.vector_setting.vector_weight * query_vector_score
+    + self.weights.keyword_setting.keyword_weight * query_score
+)
+```
+
+这种混合策略能够结合语义理解和关键词匹配的优势，显著提升召回效果。
+
+### 3. 高级重排序机制
+
+为了进一步提高检索精度，Dify实现了多种重排序（Reranking）策略：
+
+#### 3.1 模型重排序
+
+利用专门的重排序模型对初步检索结果进行再排序，提高最终结果的相关性：
+```python
+class RerankModelRunner(BaseRerankRunner):
+    def __init__(self, rerank_model_instance: ModelInstance) -> None:
+        self.rerank_model_instance = rerank_model_instance
+
+    def run(self, query: str, documents: list[Document], 
+           score_threshold: Optional[float] = None,
+           top_n: Optional[int] = None,
+           user: Optional[str] = None) -> list[Document]:
+        # 使用重排序模型对文档进行重新排序
+        # ...
+```
+
+#### 3.2 加权重排序
+
+根据不同特征为文档赋予权重，优化排序结果：
+```python
+class WeightRerankRunner(BaseRerankRunner):
+    def __init__(self, tenant_id: str, weights: Weights) -> None:
+        self.tenant_id = tenant_id
+        self.weights = weights
+        
+    def run(self, query: str, documents: list[Document], 
+           score_threshold: Optional[float] = None,
+           top_n: Optional[int] = None,
+           user: Optional[str] = None) -> list[Document]:
+        # 基于权重的重排序实现
+        # ...
+```
+
+#### 3.3 多线程并行检索优化
+
+为了提高检索效率，Dify实现了多线程并行检索机制：
+```python
+# 并行检索优化
+with ThreadPoolExecutor(max_workers=dify_config.RETRIEVAL_SERVICE_EXECUTORS) as executor:
+    # 并行处理多个检索任务
+    # ...
+```
+
+### 4. 用户控制与可配置性
+
+Dify提供了丰富的用户配置选项，使用户可以根据具体需求调整检索参数：
+
+#### 4.1 索引方法选择
+
+用户可以选择不同质量级别的索引方法：
+- **高质量模式**：使用嵌入模型进行向量索引，提供更精确的检索结果
+- **经济模式**：使用关键词索引，不消耗token但检索精度相对较低
+
+#### 4.2 检索参数调优
+
+用户可以调整以下关键参数，优化检索效果：
+- **Top K**：控制返回结果数量
+- **相似度阈值**：设置最低相似度要求
+- **重排序开关**：启用或禁用重排序功能
+- **混合搜索权重**：调整向量检索和关键词检索的权重比例
+
+### 5. 优化效果
+
+通过上述优化策略的综合应用，Dify在文档检索方面取得了显著的效果提升：
+
+1. **提高召回率**：混合检索策略显著提高了相关文档的召回能力
+2. **增强精确度**：重排序机制保证了检索结果的高相关性
+3. **保持上下文**：块重叠和父子分块策略保证了上下文的连贯性
+4. **灵活适配**：多种检索和分块策略可根据不同文档类型和查询需求灵活调整
+5. **高效处理**：并行检索优化提高了系统处理速度，特别是对于大型文档集合
+
+这些优化使Dify的RAG系统能够在各种复杂场景下提供高质量的文档检索服务，为生成式AI提供准确的上下文信息。
+
 ## 工作流程
 
 文档处理的整体工作流程如下：
