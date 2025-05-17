@@ -1,0 +1,4 @@
+llama-index
+llama-index-graph-stores-neo4j
+pandas
+python-dotenv 
