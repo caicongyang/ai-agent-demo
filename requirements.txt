@@ -1,31 +1,55 @@
 #conda create -n ai-agent-demo python=3.11
 #conda activate ai-agent-demo
 #pip install -r requirements.txt --upgrade
-langgraph>=0.2.20,<0.3
+
+# LangGraph 相关包 - 更新到最新版本支持 interrupt 和 Command API
+langgraph>=0.6.6
+langgraph-checkpoint>=2.1.1
+langgraph-prebuilt>=0.6.4
+langgraph-sdk>=0.2.2
 langchain>=0.3,<0.4
+langchain-core>=0.3.74
 langchain-community>=0.3.0
+langsmith>=0.1.125
 langchain-chroma>=0.1.0
+langchain-openai>=0.3.21
+
+# API 和搜索
 serpapi>=0.1.0
 openai>=1.0.0
-pydantic<2.10,>=2.9
+google-search-results>=2.4.2
+
+# 数据处理
 pandas>=2.0.0
 openpyxl>=3.1.0
-langchain-openai>=0.1.0
+pydantic<2.10,>=2.9
+
+# 网络和HTTP
 httpx[socks]>=0.27.0
+
+# 向量数据库和RAG
 chromadb>=0.4.0
 unstructured>=0.10.0
+
+# PDF处理
 pdf2image>=1.16.0
 pytesseract>=0.3.9
 poppler-utils
-flask>=2.1.0
-python-dotenv>=1.0.0
 pdf2docx>=0.5.6
 python-docx>=0.8.11
-langchain-openai>=0.1.0
-langchain-community>=0.3.0
-langchain-core>=0.1.0
-google-search-results>=2.4.2
+
+# Web应用
+flask>=2.1.0
+python-dotenv>=1.0.0
+
+# 数据库
 pymysql>=1.0.2
 sqlalchemy>=2.0.0
+
+# 浏览器自动化
 pyppeteer>=2.0.0
+playwright>=1.40.0
+
+# 可视化和其他
 graphviz==0.20.3
+mcp>=1.1.0
