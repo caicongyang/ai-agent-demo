@@ -35,3 +35,11 @@ temp/
 *.xlsx
 
 .history
+
+.idea
+.venv
+
+context_engineer/.venv/
+context_engineer/venv/
+context_engineer/venv/
+context_engineer/.idea
