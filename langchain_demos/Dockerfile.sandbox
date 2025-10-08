@@ -1,0 +1,31 @@
+# 安全的 Python 沙箱环境
+FROM python:3.11-slim
+
+# 创建非 root 用户
+RUN useradd -m -u 1000 sandbox && \
+    mkdir -p /code && \
+    chown sandbox:sandbox /code
+
+# 安装基础包（限制版本以提高安全性）
+RUN pip install --no-cache-dir \
+    numpy==1.24.3 \
+    pandas==2.0.3 \
+    matplotlib==3.7.1 \
+    requests==2.31.0 \
+    scipy==1.10.1
+
+# 移除不必要的包和工具
+RUN apt-get update && \
+    apt-get remove -y wget curl && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# 设置工作目录和用户
+WORKDIR /code
+USER sandbox
+
+# 限制 Python 路径
+ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
+
+# 默认命令
+CMD ["python"]

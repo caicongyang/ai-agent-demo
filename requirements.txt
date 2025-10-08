@@ -3,53 +3,139 @@
 #pip install -r requirements.txt --upgrade
 
 # LangGraph 相关包 - 更新到最新版本支持 interrupt 和 Command API
-langgraph>=0.6.6
+langgraph>=0.6.7
 langgraph-checkpoint>=2.1.1
 langgraph-prebuilt>=0.6.4
 langgraph-sdk>=0.2.2
-langchain>=0.3,<0.4
-langchain-core>=0.3.74
-langchain-community>=0.3.0
-langsmith>=0.1.125
-langchain-chroma>=0.1.0
-langchain-openai>=0.3.21
+langchain>=0.3.27
+langchain-core>=0.3.76
+langchain-community>=0.3.27
+langsmith>=0.4.14
+langchain-chroma>=0.2.5
+langchain-openai>=0.3.33
+langchain-text-splitters>=0.3.9
+
+# MCP 相关包 - Model Context Protocol 支持
+mcp>=1.12.3
+langchain-mcp-adapters>=0.1.9
 
 # API 和搜索
-serpapi>=0.1.0
-openai>=1.0.0
+serpapi>=0.1.5
+openai>=1.108.0
 google-search-results>=2.4.2
 
 # 数据处理
-pandas>=2.0.0
-openpyxl>=3.1.0
-pydantic<2.10,>=2.9
+pandas>=2.3.1
+openpyxl>=3.1.5
+pydantic>=2.9.2
+pydantic-settings>=2.10.1
+pydantic-core>=2.23.4
+numpy>=2.2.6
 
 # 网络和HTTP
-httpx[socks]>=0.27.0
+httpx[socks]>=0.28.1
+httpcore>=1.0.9
+httptools>=0.6.4
+httpx-sse>=0.4.1
+aiohttp>=3.12.15
+aiosignal>=1.4.0
+aiohappyeyeballs>=2.6.1
+requests>=2.32.4
+requests-oauthlib>=2.0.0
+requests-toolbelt>=1.0.0
 
 # 向量数据库和RAG
-chromadb>=0.4.0
-unstructured>=0.10.0
+chromadb>=1.0.15
+unstructured>=0.18.11
+unstructured-client>=0.28.1
 
 # PDF处理
-pdf2image>=1.16.0
-pytesseract>=0.3.9
-poppler-utils
-pdf2docx>=0.5.6
-python-docx>=0.8.11
+pdf2image>=1.17.0
+pytesseract>=0.3.13
+poppler-utils>=0.1.0
+pdf2docx>=0.5.8
+python-docx>=1.2.0
+PyMuPDF>=1.26.3
+pypdf>=5.9.0
 
 # Web应用
-flask>=2.1.0
-python-dotenv>=1.0.0
+flask>=3.1.1
+flask-cors>=6.0.1
+python-dotenv>=1.1.1
+starlette>=0.47.2
+uvicorn>=0.35.0
 
 # 数据库
-pymysql>=1.0.2
-sqlalchemy>=2.0.0
+pymysql>=1.1.1
+sqlalchemy>=2.0.42
 
 # 浏览器自动化
 pyppeteer>=2.0.0
-playwright>=1.40.0
+playwright>=1.46.0
 
 # 可视化和其他
-graphviz==0.20.3
-mcp>=1.1.0
+graphviz>=0.20.3
+markdown>=3.9
+mistune>=3.1.4
+pygments>=2.19.2
+
+# 代码解释器和工作流相关包
+docker>=7.1.0
+RestrictedPython>=8.0
+psutil>=7.0.0
+langchain-experimental>=0.3.4
+
+# 机器学习和AI相关
+huggingface-hub>=0.34.3
+tokenizers>=0.21.4
+tiktoken>=0.9.0
+onnxruntime>=1.22.1
+
+# 文本处理和NLP
+nltk>=3.9.1
+langdetect>=1.0.9
+beautifulsoup4>=4.13.4
+
+# 系统和工具
+typer>=0.16.0
+click>=8.2.1
+rich>=14.1.0
+coloredlogs>=15.0.1
+termcolor>=3.1.0
+tqdm>=4.67.1
+tabulate>=0.9.0
+
+# 加密和安全
+cryptography>=45.0.5
+bcrypt>=4.3.0
+
+# 异步和并发
+anyio>=4.10.0
+nest-asyncio>=1.6.0
+uvloop>=0.21.0
+
+# 数据格式和序列化
+orjson>=3.11.1
+ormsgpack>=1.10.0
+msgpack>=1.1.1
+jsonpatch>=1.33
+jsonpointer>=3.0.0
+jsonschema>=4.25.0
+PyYAML>=6.0.2
+
+# 监控和可观测性
+opentelemetry-api>=1.36.0
+opentelemetry-sdk>=1.36.0
+opentelemetry-exporter-otlp-proto-grpc>=1.36.0
+posthog>=5.4.0
+
+# 其他工具和实用包
+fire>=0.7.0
+filelock>=3.18.0
+fsspec>=2025.7.0
+packaging>=25.0
+setuptools>=78.1.1
+wheel>=0.45.1
+build>=1.3.0
+backoff>=2.2.1
+tenacity>=9.1.2

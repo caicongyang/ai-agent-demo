@@ -50,6 +50,7 @@ class ReActChainDemo:
             Tool(
                 name="calculator",
                 description="计算器，用于进行数学计算。输入应该是数学表达式字符串。",
+
                 func=self._calculator
             )
         ]
